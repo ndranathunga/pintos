@@ -80,6 +80,31 @@ typedef int tid_t;
    only because they are mutually exclusive: only a thread in the
    ready state is on the run queue, whereas only a thread in the
    blocked state is on a semaphore wait list. */
+struct userThread
+{
+  tid_t tid;
+  bool exit,wait,goal;
+  int exit_status;
+  char * argv;
+  char * prog;
+  struct thread * me_t;
+  struct thread * parent_t;
+  struct list_elem elem;
+  struct semaphore sema;
+  struct semaphore sema_waiting;
+};
+
+// define file descriptor table
+struct file_descriptor_table
+{
+  int fd_id;
+  struct file * file_;
+  struct thread * masterThread;
+  struct list_elem elem;
+};
+
+struct list all_list;
+
 struct thread
   {
     /* Owned by thread.c. */
@@ -96,6 +121,10 @@ struct thread
 #ifdef USERPROG
     /* Owned by userprog/process.c. */
     uint32_t *pagedir;                  /* Page directory. */
+    struct userThread * userThread;
+    struct list child_userThread;
+    struct list file_descriptor_list;
+    struct file * file_current;
 #endif
 
     /* Owned by thread.c. */
@@ -105,6 +134,9 @@ struct thread
 /* If false (default), use round-robin scheduler.
    If true, use multi-level feedback queue scheduler.
    Controlled by kernel command-line option "-o mlfqs". */
+
+
+
 extern bool thread_mlfqs;
 
 void thread_init (void);
